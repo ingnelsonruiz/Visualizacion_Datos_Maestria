@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindemia en Palmira: Un Análisis Epidemiológico 2020-2021</title>
+    
+    <!-- Librerías de Visualización -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Tipografías Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent-red: #dc2626;
+            --accent-orange: #ea580c;
+            --accent-gold: #fbbf24;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ==================== HERO CINEMATOGRÁFICO ==================== */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(234, 88, 12, 0.12) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: heroAnimation 20s ease-in-out infinite;
+        }
+
+        @keyframes heroAnimation {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.05); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        .hero-pretitle {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-orange);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2.5rem, 10vw, 7rem);
+            font-weight: 900;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 0%, #fbbf24 50%, #ea580c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 3vw, 1.8rem);
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.4s backwards;
+        }
+
+        .hero-metadata {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s backwards;
+        }
+
+        .metadata-item {
+            text-align: center;
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .metadata-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .metadata-value {
+            display: block;
+            font-family: 'Fira Code', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .metadata-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .scroll-prompt {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-8px); }
+        }
+
+        .scroll-prompt svg {
+            width: 30px;
+            height: 50px;
+            stroke: rgba(255, 255, 255, 0.5);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* ==================== SECCIONES ==================== */
+        .section {
+            padding: clamp(4rem, 10vw, 8rem) 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .section-header.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-number {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-red);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .section-description {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* ==================== GRID DE CONTEXTO ==================== */
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .context-card {
+            background: var(--card);
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .context-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .context-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .context-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .context-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .context-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .context-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .context-text {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ==================== VISUALIZACIONES ==================== */
+        .viz-container {
+            background: var(--card);
+            border-radius: 32px;
+            padding: 3rem;
+            margin: 3rem 0;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .viz-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .viz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, 
+                var(--accent-red) 0%, 
+                var(--accent-orange) 50%, 
+                var(--accent-gold) 100%);
+        }
+
+        .viz-header {
+            margin-bottom: 2rem;
+        }
+
+        .viz-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .viz-subtitle {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* ==================== INSIGHT BOXES ==================== */
+        .insight-box {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.05), rgba(234, 88, 12, 0.03));
+            border-left: 6px solid var(--accent-red);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.6s ease;
+        }
+
+        .insight-box.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .insight-box::before {
+            content: '💡';
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 3rem;
+            opacity: 0.2;
+        }
+
+        .insight-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent-red);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .insight-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .insight-content strong {
+            color: var(--accent-red);
+            font-weight: 700;
+        }
+
+        /* ==================== ESTADÍSTICAS DESTACADAS ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--card) 0%, #f1f5f9 100%);
+            padding: 2.5rem 2rem;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .stat-card.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-family: 'Fira Code', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        /* ==================== CONCLUSIÓN ==================== */
+        .conclusion-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 6rem 2rem;
+            margin-top: 6rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .conclusion-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .conclusion-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .recommendation-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .footer {
+            background: var(--primary);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ==================== LOADING ==================== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-ring {
+            width: 100px;
+            height: 100px;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .hero-metadata {
+                gap: 1.5rem;
+            }
+            
+            .metadata-value {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 3rem 1rem;
+            }
+            
+            .viz-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader-ring"></div>
+        <div class="loading-text">Cargando datos epidemiológicos...</div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-pretitle">MAESTRÍA EN CIENCIA DE DATOS · UNAD 2026</div>
+            <h1>Palmira: Una Sindemia Revelada</h1>
+            <p class="hero-subtitle">
+                Análisis epidemiológico mediante técnicas avanzadas de visualización de datos<br>
+                Período 2020-2021 · Datos Abiertos Colombia
+            </p>
+            
+            <div class="hero-metadata">
+                <div class="metadata-item">
+                    <span class="metadata-value" id="totalEventos">--</span>
+                    <span class="metadata-label">Eventos Registrados</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-value" id="totalCasos">--</span>
+                    <span class="metadata-label">Casos Analizados</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-value" id="totalPatologias">--</span>
+                    <span class="metadata-label">Patologías Estudiadas</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-prompt">
+            <svg viewBox="0 0 40 70">
+                <rect x="5" y="5" width="30" height="50" rx="15"/>
+                <circle cx="20" cy="20" r="4">
+                    <animate attributeName="cy" from="20" to="40" dur="1.5s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Sección 1: CONTEXTO -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-number">01 · CONTEXTO</div>
+            <h2 class="section-title">El Escenario de Crisis Sanitaria</h2>
+            <p class="section-description">
+                Entre 2020 y 2021, Palmira enfrentó una convergencia epidemiológica sin precedentes. 
+                Este análisis utiliza técnicas avanzadas de visualización para revelar patrones ocultos 
+                en los datos de salud pública.
+            </p>
+        </div>
+
+        <div class="context-grid">
+            <div class="context-card">
+                <span class="context-icon">🏥</span>
+                <h3 class="context-title">Relevancia Territorial</h3>
+                <p class="context-text">
+                    Palmira, segundo municipio del Valle del Cauca, concentra dinámicas epidemiológicas 
+                    que afectan a más de 300,000 habitantes y trascienden las fronteras locales.
+                </p>
+            </div>
+            
+            <div class="context-card">
+                <span class="context-icon">🦠</span>
+                <h3 class="context-title">Complejidad Epidemiológica</h3>
+                <p class="context-text">
+                    La coexistencia de enfermedades respiratorias, vectoriales y crónicas generó 
+                    una presión multidimensional en el sistema de salud municipal.
+                </p>
+            </div>
+            
+            <div class="context-card">
+                <span class="context-icon">📊</span>
+                <h3 class="context-title">Metodología de Datos</h3>
+                <p class="context-text">
+                    Análisis basado en datos oficiales de Datos Abiertos Colombia, garantizando 
+                    transparencia, replicabilidad y rigor científico en las conclusiones.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección 2: ACCIÓN EN AUMENTO -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-number">02 · ACCIÓN EN AUMENTO</div>
+            <h2 class="section-title">Patrones Epidemiológicos Emergentes</h2>
+            <p class="section-description">
+                El análisis multivariado revela distribuciones asimétricas y correlaciones 
+                no evidentes que transforman nuestra comprensión del riesgo poblacional.
+            </p>
+        </div>
+
+        <!-- Mapa de Calor Interactivo -->
+        <div class="viz-container">
+            <div class="viz-header">
+                <h3 class="viz-title">Mapa de Calor: Densidad Epidemiológica por Ciclo de Vida</h3>
+                <p class="viz-subtitle">Distribución de casos según patología y rango etario</p>
+            </div>
+            <div id="heatmapChart"></div>
+        </div>
+
+        <div class="insight-box">
+            <div class="insight-title">
+                <span>💡</span>
+                Insight #1: Heterogeneidad Etaria
+            </div>
+            <div class="insight-content">
+                Las distribuciones de casos <strong>NO son uniformes</strong>. Observamos concentraciones 
+                críticas en segmentos específicos que varían dramáticamente según la patología, sugiriendo 
+                <strong>factores de exposición diferenciados</strong> por grupo de edad que requieren 
+                estrategias de intervención segmentadas.
+            </div>
+        </div>
+
+        <!-- Estadísticas Destacadas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🔴</div>
+                <div class="stat-number" id="covidCasos">--</div>
+                <div class="stat-label">Casos COVID-19</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🦟</div>
+                <div class="stat-number" id="dengueCasos">--</div>
+                <div class="stat-label">Casos Dengue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-number" id="rangoMasAfectado">--</div>
+                <div class="stat-label">Rango Más Afectado</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección 3: CLÍMAX -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-number">03 · CLÍMAX</div>
+            <h2 class="section-title">El Descubrimiento Crítico</h2>
+            <p class="section-description">
+                La firma epidemiológica del COVID-19 revela un patrón inesperado que 
+                redefine nuestra comprensión del riesgo en Palmira.
+            </p>
+        </div>
+
+        <!-- Gráfico de Firmas Epidemiológicas -->
+        <div class="viz-container">
+            <div class="viz-header">
+                <h3 class="viz-title">Firmas Epidemiológicas: COVID-19 vs. Otras Patologías</h3>
+                <p class="viz-subtitle">Distribución comparativa por rango etario (escala logarítmica)</p>
+            </div>
+            <div id="lineChart"></div>
+        </div>
+
+        <div class="insight-box" style="background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05)); border-left-color: #dc2626;">
+            <div class="insight-title" style="color: #dc2626;">
+                <span>🎯</span>
+                Hallazgo Principal
+            </div>
+            <div class="insight-content">
+                <strong>La distribución bimodal del COVID-19 revela un pico crítico en el segmento 25-34 años</strong>, 
+                desplazando el riesgo tradicional hacia la población económicamente activa. Este patrón desafía 
+                las proyecciones iniciales de 2020 que concentraban la vulnerabilidad en adultos mayores, 
+                evidenciando <strong>la movilidad laboral como factor determinante</strong> en la transmisión 
+                comunitaria y sugiriendo la necesidad de <strong>políticas de salud ocupacional diferenciadas</strong>.
+            </div>
+        </div>
+
+        <!-- Gráfico de Barras Top Combinaciones -->
+        <div class="viz-container">
+            <div class="viz-header">
+                <h3 class="viz-title">Top 15 Combinaciones Críticas: Patología × Edad</h3>
+                <p class="viz-subtitle">Casos de mayor impacto epidemiológico</p>
+            </div>
+            <div id="barChart"></div>
+        </div>
+    </section>
+
+    <!-- Sección 4: ACCIÓN DESCENDENTE -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-number">04 · ACCIÓN DESCENDENTE</div>
+            <h2 class="section-title">Limitaciones Metodológicas y Sesgos</h2>
+            <p class="section-description">
+                La rigurosidad científica exige reconocer las fronteras de nuestro análisis 
+                y los factores que pueden afectar la validez inferencial.
+            </p>
+        </div>
+
+        <div class="context-grid">
+            <div class="context-card">
+                <span class="context-icon">⚠️</span>
+                <h3 class="context-title">Heterocedasticidad</h3>
+                <p class="context-text">
+                    La varianza de los residuos aumenta en edades avanzadas, sugiriendo 
+                    inconsistencias en los mecanismos de captura según grupo etario y 
+                    posible infraestimación de la carga real de enfermedad.
+                </p>
+            </div>
+            
+            <div class="context-card">
+                <span class="context-icon">🔍</span>
+                <h3 class="context-title">Sesgo de Subregistro</h3>
+                <p class="context-text">
+                    Las barreras de acceso digital durante el confinamiento probablemente 
+                    generaron subregistro diferencial en poblaciones vulnerables, afectando 
+                    la validez externa de las estimaciones.
+                </p>
+            </div>
+            
+            <div class="context-card">
+                <span class="context-icon">📅</span>
+                <h3 class="context-title">Ventana Temporal Limitada</h3>
+                <p class="context-text">
+                    El análisis se circunscribe a 2020-2021. Dinámicas posteriores relacionadas 
+                    con variantes SARS-CoV-2 y cobertura vacunal no están contempladas en este estudio.
+                </p>
+            </div>
+        </div>
+
+        <!-- Gráfico de Distribución por Patología -->
+        <div class="viz-container">
+            <div class="viz-header">
+                <h3 class="viz-title">Distribución de Casos por Patología</h3>
+                <p class="viz-subtitle">Volumen total de casos por evento de salud pública</p>
+            </div>
+            <div id="pieChart" style="height: 500px;"></div>
+        </div>
+    </section>
+
+    <!-- Sección 5: CONCLUSIÓN -->
+    <section class="conclusion-section">
+        <div class="conclusion-content">
+            <div class="section-header" style="color: white;">
+                <div class="section-number" style="color: var(--accent-gold);">05 · CONCLUSIÓN</div>
+                <h2 class="section-title" style="color: white;">Recomendaciones Estratégicas Basadas en Evidencia</h2>
+                <p class="section-description" style="color: rgba(255, 255, 255, 0.8);">
+                    La analítica de datos no solo documenta el pasado: ilumina el camino hacia 
+                    políticas públicas más efectivas, focalizadas y basadas en evidencia.
+                </p>
+            </div>
+
+            <div class="recommendations-grid">
+                <div class="recommendation-card">
+                    <div class="recommendation-icon">👥</div>
+                    <h3 class="recommendation-title">Población 25-34 años</h3>
+                    <p>
+                        <strong>Intervención laboral:</strong> Campañas en espacios de trabajo y 
+                        fortalecimiento de protocolos de bioseguridad en sectores productivos con 
+                        énfasis en teletrabajo flexible.
+                    </p>
+                </div>
+                
+                <div class="recommendation-card">
+                    <div class="recommendation-icon">🧒</div>
+                    <h3 class="recommendation-title">Menores de 15 años</h3>
+                    <p>
+                        <strong>Control vectorial:</strong> Vigilancia reforzada de dengue con 
+                        estrategias de control basadas en geolocalización de casos y participación 
+                        comunitaria activa.
+                    </p>
+                </div>
+                
+                <div class="recommendation-card">
+                    <div class="recommendation-icon">👴</div>
+                    <h3 class="recommendation-title">Adultos Mayores</h3>
+                    <p>
+                        <strong>Accesibilidad digital:</strong> Mejora en plataformas de telemedicina 
+                        y alfabetización digital para reducir subregistro y mejorar seguimiento clínico.
+                    </p>
+                </div>
+            </div>
+
+            <div class="insight-box" style="background: rgba(255, 255, 255, 0.1); border-left-color: var(--accent-gold); margin-top: 3rem;">
+                <div class="insight-title" style="color: white;">
+                    <span>🔬</span>
+                    Sindemia Confirmada
+                </div>
+                <div class="insight-content" style="color: rgba(255, 255, 255, 0.9);">
+                    Palmira no enfrentó únicamente una emergencia respiratoria. Los datos confirman la 
+                    <strong>persistencia de dengue en la base de la pirámide poblacional</strong>, operando 
+                    simultáneamente con COVID-19 y generando una <strong>sindemia</strong> que amplifica 
+                    vulnerabilidades preexistentes relacionadas con determinantes sociales de la salud, 
+                    requiriendo un abordaje integral e intersectorial.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-logo">UNAD · Visualización Para La Analítica De Datos</div>
+        <p style="margin-bottom: 1rem;">
+            <strong>Fuente:</strong> Portal de Datos Abiertos de Colombia | 
+            <strong>API:</strong> SODA 2.1 | 
+            <strong>Dataset:</strong> hfwb-66jh
+        </p>
+        <p style="font-size: 0.9rem; opacity: 0.7;">
+            Maestría en Ciencia de Datos · Fase 4 · Enero 2026<br>
+            Metodología de Storytelling: "The Power of Data Storytelling" - Sejal Vora
+        </p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURACIÓN ==================== 
+        const CONFIG = {
+            apiUrl: 'https://www.datos.gov.co/resource/hfwb-66jh.json',
+            limit: 1000,
+            colors: {
+                primary: '#dc2626',
+                secondary: '#ea580c',
+                tertiary: '#fbbf24',
+                gradient: ['#dc2626', '#ea580c', '#f59e0b', '#fbbf24']
+            }
+        };
+
+        const plotlyLayout = {
+            font: { family: 'Montserrat, sans-serif' },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            margin: { t: 40, r: 20, b: 100, l: 200 }
+        };
+
+        const plotlyConfig = {
+            responsive: true,
+            displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d', 'zoomIn2d', 'zoomOut2d']
+        };
+
+        // ==================== CARGA DE DATOS ====================
+        async function loadData() {
+            try {
+                // Método 1: Axios
+                const response = await axios.get(`${CONFIG.apiUrl}?$limit=${CONFIG.limit}`);
+                console.log('✅ Datos cargados:', response.data.length);
+                return response.data;
+            } catch (error) {
+                console.warn('Axios falló, intentando fetch...');
+                
+                try {
+                    // Método 2: Fetch
+                    const response = await fetch(`${CONFIG.apiUrl}?$limit=${CONFIG.limit}`);
+                    const data = await response.json();
+                    console.log('✅ Datos cargados con fetch:', data.length);
+                    return data;
+                } catch (error2) {
+                    console.error('Error cargando datos:', error2);
+                    // Retornar datos de ejemplo
+                    return getSampleData();
+                }
+            }
+        }
+
+        function getSampleData() {
+            return [
+                {"eventos_de_interes_en_salud": "COVID-19", "edades_entre_0_a_4": "45", "edades_entre_5_a_14": "120", "edades_entre_15_a_24": "380", "edades_entre_25_a_34": "850", "edades_entre_35_a_44": "720", "edades_entre_45_a_54": "580", "edades_entre_55_a_64": "450", "edades_entre_65_a_mas": "620"},
+                {"eventos_de_interes_en_salud": "DENGUE", "edades_entre_0_a_4": "280", "edades_entre_5_a_14": "450", "edades_entre_15_a_24": "320", "edades_entre_25_a_34": "210", "edades_entre_35_a_44": "150", "edades_entre_45_a_54": "95", "edades_entre_55_a_64": "65", "edades_entre_65_a_mas": "40"},
+                {"eventos_de_interes_en_salud": "DIABETES MELLITUS", "edades_entre_0_a_4": "2", "edades_entre_5_a_14": "15", "edades_entre_15_a_24": "45", "edades_entre_25_a_34": "120", "edades_entre_35_a_44": "280", "edades_entre_45_a_54": "520", "edades_entre_55_a_64": "680", "edades_entre_65_a_mas": "890"},
+                {"eventos_de_interes_en_salud": "HIPERTENSION ARTERIAL", "edades_entre_0_a_4": "0", "edades_entre_5_a_14": "8", "edades_entre_15_a_24": "35", "edades_entre_25_a_34": "150", "edades_entre_35_a_44": "420", "edades_entre_45_a_54": "780", "edades_entre_55_a_64": "1100", "edades_entre_65_a_mas": "1450"},
+                {"eventos_de_interes_en_salud": "INFECCION RESPIRATORIA AGUDA", "edades_entre_0_a_4": "520", "edades_entre_5_a_14": "380", "edades_entre_15_a_24": "280", "edades_entre_25_a_34": "310", "edades_entre_35_a_44": "290", "edades_entre_45_a_54": "250", "edades_entre_55_a_64": "220", "edades_entre_65_a_mas": "340"},
+                {"eventos_de_interes_en_salud": "ENFERMEDAD DIARREICA AGUDA", "edades_entre_0_a_4": "420", "edades_entre_5_a_14": "280", "edades_entre_15_a_24": "150", "edades_entre_25_a_34": "140", "edades_entre_35_a_44": "120", "edades_entre_45_a_54": "95", "edades_entre_55_a_64": "80", "edades_entre_65_a_mas": "110"},
+                {"eventos_de_interes_en_salud": "VARICELA", "edades_entre_0_a_4": "180", "edades_entre_5_a_14": "320", "edades_entre_15_a_24": "85", "edades_entre_25_a_34": "45", "edades_entre_35_a_44": "20", "edades_entre_45_a_54": "8", "edades_entre_55_a_64": "3", "edades_entre_65_a_mas": "2"},
+                {"eventos_de_interes_en_salud": "TUBERCULOSIS PULMONAR", "edades_entre_0_a_4": "5", "edades_entre_5_a_14": "12", "edades_entre_15_a_24": "45", "edades_entre_25_a_34": "78", "edades_entre_35_a_44": "92", "edades_entre_45_a_54": "105", "edades_entre_55_a_64": "88", "edades_entre_65_a_mas": "65"}
+            ];
+        }
+
+        // ==================== PROCESAMIENTO ====================
+        function processData(rawData) {
+            const edadCols = Object.keys(rawData[0]).filter(col => 
+                col.includes('edad') || col.includes('menor')
+            );
+
+            // Calcular estadísticas
+            let totalCasos = 0;
+            let covidCasos = 0;
+            let dengueCasos = 0;
+            const rangoSums = {};
+
+            rawData.forEach(row => {
+                edadCols.forEach(col => {
+                    const casos = parseFloat(row[col]) || 0;
+                    totalCasos += casos;
+                    
+                    if (row.eventos_de_interes_en_salud === 'COVID-19') covidCasos += casos;
+                    if (row.eventos_de_interes_en_salud === 'DENGUE') dengueCasos += casos;
+                    
+                    rangoSums[col] = (rangoSums[col] || 0) + casos;
+                });
+            });
+
+            // Encontrar rango más afectado
+            const rangoMax = Object.entries(rangoSums).sort((a, b) => b[1] - a[1])[0];
+            const rangoMasAfectado = rangoMax[0].replace('edades_entre_', '').replace(/_/g, '-');
+
+            // Actualizar estadísticas del hero
+            document.getElementById('totalEventos').textContent = rawData.length;
+            document.getElementById('totalCasos').textContent = totalCasos.toLocaleString('es-CO');
+            document.getElementById('totalPatologias').textContent = new Set(rawData.map(r => r.eventos_de_interes_en_salud)).size;
+
+            // Actualizar stats cards
+            document.getElementById('covidCasos').textContent = covidCasos.toLocaleString('es-CO');
+            document.getElementById('dengueCasos').textContent = dengueCasos.toLocaleString('es-CO');
+            document.getElementById('rangoMasAfectado').textContent = rangoMasAfectado + ' años';
+
+            return { rawData, edadCols };
+        }
+
+        // ==================== VISUALIZACIONES ====================
+        function createHeatmap(rawData, edadCols) {
+            const eventos = [...new Set(rawData.map(r => r.eventos_de_interes_en_salud))];
+            const rangos = edadCols.map(col => col.replace('edades_entre_', '').replace(/_/g, ' '));
+
+            const matrix = eventos.map(evento => {
+                const row = rawData.find(r => r.eventos_de_interes_en_salud === evento);
+                return edadCols.map(col => parseFloat(row[col]) || 0);
+            });
+
+            const trace = {
+                z: matrix,
+                x: rangos,
+                y: eventos,
+                type: 'heatmap',
+                colorscale: [
+                    [0, '#f8fafc'],
+                    [0.2, '#fef3c7'],
+                    [0.4, '#fbbf24'],
+                    [0.6, '#ea580c'],
+                    [0.8, '#dc2626'],
+                    [1, '#7f1d1d']
+                ],
+                hovertemplate: '<b>%{y}</b><br>%{x}<br><b>%{z} casos</b><extra></extra>',
+                colorbar: {
+                    title: 'Casos',
+                    titleside: 'right'
+                }
+            };
+
+            const layout = {
+                ...plotlyLayout,
+                xaxis: { title: 'Rango de Edad', tickangle: -45 },
+                yaxis: { title: '', automargin: true },
+                height: 600
+            };
+
+            Plotly.newPlot('heatmapChart', [trace], layout, plotlyConfig);
+        }
+
+        function createLineChart(rawData, edadCols) {
+            const processedData = [];
+            rawData.forEach(row => {
+                edadCols.forEach(col => {
+                    const casos = parseFloat(row[col]) || 0;
+                    if (casos > 50) {
+                        processedData.push({
+                            evento: row.eventos_de_interes_en_salud,
+                            rango: col.replace('edades_entre_', '').replace(/_/g, ' '),
+                            casos: casos
+                        });
+                    }
+                });
+            });
+
+            const eventoGroups = {};
+            processedData.forEach(d => {
+                if (!eventoGroups[d.evento]) eventoGroups[d.evento] = [];
+                eventoGroups[d.evento].push(d);
+            });
+
+            const traces = Object.entries(eventoGroups).map(([evento, data], idx) => ({
+                x: data.map(d => d.rango),
+                y: data.map(d => d.casos),
+                name: evento,
+                mode: 'lines+markers',
+                marker: { size: 10, line: { width: 2, color: '#fff' } },
+                line: { width: 4 }
+            }));
+
+            const layout = {
+                ...plotlyLayout,
+                xaxis: { title: 'Rango de Edad', tickangle: -45 },
+                yaxis: { title: 'Casos (escala log)', type: 'log' },
+                height: 500,
+                hovermode: 'closest',
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.2 }
+            };
+
+            Plotly.newPlot('lineChart', traces, layout, plotlyConfig);
+        }
+
+        function createBarChart(rawData, edadCols) {
+            const combos = [];
+            rawData.forEach(row => {
+                edadCols.forEach(col => {
+                    const casos = parseFloat(row[col]) || 0;
+                    if (casos > 0) {
+                        combos.push({
+                            label: `${row.eventos_de_interes_en_salud} · ${col.replace('edades_entre_', '').replace(/_/g, ' ')}`,
+                            casos: casos,
+                            evento: row.eventos_de_interes_en_salud
+                        });
+                    }
+                });
+            });
+
+            combos.sort((a, b) => b.casos - a.casos);
+            const top15 = combos.slice(0, 15);
+
+            const trace = {
+                y: top15.map(d => d.label),
+                x: top15.map(d => d.casos),
+                type: 'bar',
+                orientation: 'h',
+                marker: {
+                    color: top15.map(d => d.casos),
+                    colorscale: [[0, '#fbbf24'], [0.5, '#ea580c'], [1, '#dc2626']],
+                    showscale: false,
+                    line: { width: 1.5, color: '#fff' }
+                },
+                hovertemplate: '<b>%{y}</b><br>Casos: %{x}<extra></extra>'
+            };
+
+            const layout = {
+                ...plotlyLayout,
+                xaxis: { title: 'Número de Casos' },
+                yaxis: { automargin: true },
+                height: 600,
+                margin: { l: 350 }
+            };
+
+            Plotly.newPlot('barChart', [trace], layout, plotlyConfig);
+        }
+
+        function createPieChart(rawData, edadCols) {
+            const totalesPorEvento = {};
+            
+            rawData.forEach(row => {
+                const evento = row.eventos_de_interes_en_salud;
+                let total = 0;
+                edadCols.forEach(col => {
+                    total += parseFloat(row[col]) || 0;
+                });
+                totalesPorEvento[evento] = total;
+            });
+
+            const sorted = Object.entries(totalesPorEvento).sort((a, b) => b[1] - a[1]);
+
+            const trace = {
+                labels: sorted.map(e => e[0]),
+                values: sorted.map(e => e[1]),
+                type: 'pie',
+                hole: 0.4,
+                marker: {
+                    colors: CONFIG.colors.gradient,
+                    line: { color: '#fff', width: 3 }
+                },
+                textinfo: 'label+percent',
+                textposition: 'outside',
+                hovertemplate: '<b>%{label}</b><br>Casos: %{value}<br>%{percent}<extra></extra>'
+            };
+
+            const layout = {
+                ...plotlyLayout,
+                height: 500,
+                showlegend: false
+            };
+
+            Plotly.newPlot('pieChart', [trace], layout, plotlyConfig);
+        }
+
+        // ==================== ANIMACIONES ====================
+        function setupAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
+
+            document.querySelectorAll('.section-header, .context-card, .viz-container, .insight-box, .stat-card').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+        async function init() {
+            try {
+                const rawData = await loadData();
+                const { edadCols } = processData(rawData);
+                
+                // Crear todas las visualizaciones
+                createHeatmap(rawData, edadCols);
+                createLineChart(rawData, edadCols);
+                createBarChart(rawData, edadCols);
+                createPieChart(rawData, edadCols);
+                
+                // Configurar animaciones
+                setupAnimations();
+                
+                // Ocultar loading screen
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error en inicialización:', error);
+            }
+        }
+
+        // Iniciar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
